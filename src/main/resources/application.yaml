@@ -1,13 +1,6 @@
-service:
-  name: circuit-breaker-demo
-
-server:
-  port: 8080
-
 spring:
-  config:
-    activate:
-      on-profile: local
+  application.name: resilience4j-demo
+  jackson.serialization.indent_output: true
   kafka:
     consumer:
       group-id: circuit-breaker-demo-group
@@ -16,8 +9,27 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
+server:
+  port: 8080
+
 management.endpoints.web.exposure.include: '*'
-management.endpoint.web.health.show-details: always
+management.endpoint.health.show-details: always
+
+management.health.diskspace.enabled: false
+management.health.circuitbreakers.enabled: true
+management.health.ratelimiters.enabled: false
+
+info:
+  name: ${spring.application.name}
+  description: resilience4j demo
+  environment: ${spring.profiles.active}
+  version: 0.0.1
+
+management.metrics.tags.application: ${spring.application.name}
+management.metrics.distribution.percentiles-histogram.http.server.requests: true
+management.metrics.distribution.percentiles-histogram.resilience4j.circuitbreaker.calls: true
+
+#resilience4j.circuitbreaker.metrics.use_legacy_binder: true
 
 resilience4j.circuitbreaker:
   instances:
@@ -25,27 +37,22 @@ resilience4j.circuitbreaker:
       registerHealthIndicator: true
       slidingWindowSize: 10
       minimumNumberOfCalls: 5
-      permittedNumberOfCallsInHalfOpenState: 5
+      permittedNumberOfCallsInHalfOpenState: 3
       automaticTransitionFromOpenToHalfOpenEnabled: true
-      waitDurationInOpenState: 5s
+      waitDurationInOpenState: 5000
       failureRateThreshold: 50
       eventConsumerBufferSize: 10
       recordExceptions:
         - org.springframework.web.client.HttpServerErrorException
         - java.util.concurrent.TimeoutException
         - java.io.IOException
-      ignoreExceptions:
-        - io.github.robwin.exception.BusinessException
 
 resilience4j.retry:
   instances:
     fintech:
-      maxAttempts: 5
+      maxAttempts: 3
       waitDuration: 100
       retryExceptions:
         - org.springframework.web.client.HttpServerErrorException
         - java.util.concurrent.TimeoutException
         - java.io.IOException
-      ignoreExceptions:
-        - io.github.robwin.exception.BusinessException
-
