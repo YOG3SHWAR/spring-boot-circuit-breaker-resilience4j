@@ -1,0 +1,51 @@
+service:
+  name: circuit-breaker-demo
+
+server:
+  port: 8080
+
+spring:
+  config:
+    activate:
+      on-profile: local
+  kafka:
+    consumer:
+      group-id: circuit-breaker-demo-group
+      bootstrap-server: localhost:9092
+      topic: circuit_breaker_demo
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+management.endpoints.web.exposure.include: '*'
+management.endpoint.web.health.show-details: always
+
+resilience4j.circuitbreaker:
+  instances:
+    fintech:
+      registerHealthIndicator: true
+      slidingWindowSize: 10
+      minimumNumberOfCalls: 5
+      permittedNumberOfCallsInHalfOpenState: 5
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      waitDurationInOpenState: 5s
+      failureRateThreshold: 50
+      eventConsumerBufferSize: 10
+      recordExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+        - java.util.concurrent.TimeoutException
+        - java.io.IOException
+      ignoreExceptions:
+        - io.github.robwin.exception.BusinessException
+
+resilience4j.retry:
+  instances:
+    fintech:
+      maxAttempts: 5
+      waitDuration: 100
+      retryExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+        - java.util.concurrent.TimeoutException
+        - java.io.IOException
+      ignoreExceptions:
+        - io.github.robwin.exception.BusinessException
+

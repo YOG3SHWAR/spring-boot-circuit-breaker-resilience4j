@@ -1,0 +1,13 @@
+{
+  "httpRequest": {
+    "method": "GET",
+    "path": "/circuit-breaker"
+  },
+  "httpResponse": {
+    "statusCode": 200,
+    "body": {
+      "type": "JSON",
+      "json": "{\"access_token\":\"123\"}"
+    }
+  }
+}
