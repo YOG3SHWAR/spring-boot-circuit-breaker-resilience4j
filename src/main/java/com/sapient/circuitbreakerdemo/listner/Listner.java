@@ -36,7 +36,7 @@ public class Listner {
             case OPEN:
             case CLOSED:
             case HALF_OPEN:
-                log.info("circuit-breaker state: {}", state);
+                log.info("circuit-breaker state is: {}", state);
                 break;
         }
     }

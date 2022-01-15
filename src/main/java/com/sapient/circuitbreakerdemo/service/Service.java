@@ -13,9 +13,9 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class Service {
 
-//    @CircuitBreaker(name = "fintech", fallbackMethod = "fallBack")
-    @CircuitBreaker(name = "fintech")
-    @Retry(name = "fintech")
+    @CircuitBreaker(name = "fintech", fallbackMethod = "fallBack")
+//    @CircuitBreaker(name = "fintech")
+//    @Retry(name = "fintech")
     public void callRestApi() {
         log.info("yogeshwar retrying");
         throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "This is a remote exception");
