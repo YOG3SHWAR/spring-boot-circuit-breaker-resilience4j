@@ -26,7 +26,7 @@ public class Listner {
     @KafkaListener(topics = {"circuit_breaker_demo"})
     public void readMessage(String message) {
         log.info("message read from topic: {}", message);
-        service.callRestApi();
+        service.callRestApi(message);
     }
 
     private void onStateChange(final CircuitBreakerOnStateTransitionEvent event) {

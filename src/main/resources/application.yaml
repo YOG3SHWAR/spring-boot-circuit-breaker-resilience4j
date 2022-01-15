@@ -36,10 +36,10 @@ resilience4j.circuitbreaker:
     fintech:
       registerHealthIndicator: true
       slidingWindowSize: 10
-      minimumNumberOfCalls: 5
-      permittedNumberOfCallsInHalfOpenState: 3
+      minimumNumberOfCalls: 3
+      permittedNumberOfCallsInHalfOpenState: 1
       automaticTransitionFromOpenToHalfOpenEnabled: true
-      waitDurationInOpenState: 5000s
+      waitDurationInOpenState: 10s
       failureRateThreshold: 50
       eventConsumerBufferSize: 10
       recordExceptions:
@@ -56,3 +56,5 @@ resilience4j.retry:
         - org.springframework.web.client.HttpServerErrorException
         - java.util.concurrent.TimeoutException
         - java.io.IOException
+
+baseUrl: "http://localhost:1080/"
