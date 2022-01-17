@@ -5,6 +5,10 @@
   },
   "httpResponse": {
     "statusCode": 200,
+    "delay": {
+      "timeUnit": "SECONDS",
+      "value": 5
+    },
     "body": {
       "type": "JSON",
       "json": "{\"access_token\":\"123\"}"

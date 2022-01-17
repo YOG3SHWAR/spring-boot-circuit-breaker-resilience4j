@@ -17,9 +17,9 @@ public class Service {
     @Value(value = "${baseUrl}")
     private String baseUrl;
 
-    @CircuitBreaker(name = "fintech", fallbackMethod = "fallBack")
-//    @CircuitBreaker(name = "fintech")
-//    @Retry(name = "fintech")
+//    @CircuitBreaker(name = "fintech", fallbackMethod = "fallBack")
+    @CircuitBreaker(name = "fintech")
+    @Retry(name = "fintech")
     public void callRestApi(String message) {
         log.info("calling rest api...");
         if (message.equalsIgnoreCase("hello"))
