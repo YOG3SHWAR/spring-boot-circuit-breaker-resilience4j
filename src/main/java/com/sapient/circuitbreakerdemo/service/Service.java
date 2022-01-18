@@ -3,11 +3,8 @@ package com.sapient.circuitbreakerdemo.service;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 @org.springframework.stereotype.Service
@@ -22,17 +19,26 @@ public class Service {
     @Retry(name = "fintech")
     public void callRestApi(String message) {
         log.info("calling rest api...");
-        if (message.equalsIgnoreCase("hello"))
-            throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "This is a remote exception");
         callMockserver();
     }
 
     private void callMockserver() {
         log.info("calling mockserver...");
         String uri = baseUrl + "circuit-breaker";
-        RestTemplate restTemplate = new RestTemplate();
+        RestTemplate restTemplate = new RestTemplate(getClientHttpRequestFactory());
         String response = restTemplate.getForObject(uri, String.class);
         log.info("response = {}", response);
+    }
+
+    private SimpleClientHttpRequestFactory getClientHttpRequestFactory() {
+        SimpleClientHttpRequestFactory clientHttpRequestFactory
+                = new SimpleClientHttpRequestFactory();
+        //Connect timeout
+        clientHttpRequestFactory.setConnectTimeout(5);
+
+        //Read timeout
+        clientHttpRequestFactory.setReadTimeout(5000);
+        return clientHttpRequestFactory;
     }
 
     public void fallBack(Exception e) {
