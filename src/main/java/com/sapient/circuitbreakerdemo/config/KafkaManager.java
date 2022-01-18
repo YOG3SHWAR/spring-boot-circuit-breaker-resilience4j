@@ -12,6 +12,7 @@ public class KafkaManager {
     public KafkaManager(KafkaListenerEndpointRegistry registry) {
         this.registry = registry;
     }
+
     public void pause() {
         registry.getListenerContainers().forEach(MessageListenerContainer::pause);
     }
