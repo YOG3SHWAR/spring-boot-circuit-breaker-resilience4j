@@ -7,7 +7,7 @@
     "statusCode": 200,
     "delay": {
       "timeUnit": "SECONDS",
-      "value": 5
+      "value": 500
     },
     "body": {
       "type": "JSON",
