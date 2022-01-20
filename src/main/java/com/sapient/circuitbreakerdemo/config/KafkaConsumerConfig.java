@@ -1,5 +1,6 @@
 package com.sapient.circuitbreakerdemo.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -12,10 +13,12 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.SeekToCurrentErrorHandler;
+import org.springframework.util.backoff.FixedBackOff;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @EnableKafka
 @Configuration
 public class KafkaConsumerConfig {
@@ -33,7 +36,7 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 100);
+        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 10000);
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
@@ -58,9 +61,15 @@ public class KafkaConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
 
         factory.setConsumerFactory(consumerFactory());
-        factory.setErrorHandler(new SeekToCurrentErrorHandler(
-                new DeadLetterPublishingRecoverer(kafkaTemplate())));
+        factory.setErrorHandler(new SeekToCurrentErrorHandler((rec, ex) -> {
+            log.info("Exception caught in error handler" + ex.getMessage());
+        }, new FixedBackOff(0L, 0)));
         return factory;
+    }
+
+    private SeekToCurrentErrorHandler seekToCurrentErrorHandler() {
+        return new SeekToCurrentErrorHandler(
+                new DeadLetterPublishingRecoverer(kafkaTemplate()), new FixedBackOff(0L, 0));
     }
 
 }

@@ -34,7 +34,7 @@ public class Service {
         SimpleClientHttpRequestFactory clientHttpRequestFactory
                 = new SimpleClientHttpRequestFactory();
         //Connect timeout
-        clientHttpRequestFactory.setConnectTimeout(5);
+        clientHttpRequestFactory.setConnectTimeout(5000);
 
         //Read timeout
         clientHttpRequestFactory.setReadTimeout(5000);

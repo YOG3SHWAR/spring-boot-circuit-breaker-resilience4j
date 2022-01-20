@@ -36,27 +36,30 @@ resilience4j.circuitbreaker:
     fintech:
       registerHealthIndicator: true
       slidingWindowSize: 10
-      minimumNumberOfCalls: 5
+      minimumNumberOfCalls: 1
       permittedNumberOfCallsInHalfOpenState: 1
       automaticTransitionFromOpenToHalfOpenEnabled: true
-      waitDurationInOpenState: 10s
+      waitDurationInOpenState: 30s
       failureRateThreshold: 50
       eventConsumerBufferSize: 10
       recordExceptions:
-        - org.springframework.web.client.ResourceAccessException
-        - org.springframework.web.client.HttpServerErrorException
         - java.util.concurrent.TimeoutException
         - java.io.IOException
+        - org.springframework.web.client.HttpServerErrorException
+        - org.springframework.web.client.ResourceAccessException
+      ignoreExceptions:
 
 resilience4j.retry:
   instances:
     fintech:
-      maxAttempts: 5
-      waitDuration: 1000
+      maxAttempts: 1
+      waitDuration: 10s
       retryExceptions:
-        - org.springframework.web.client.HttpServerErrorException
         - java.util.concurrent.TimeoutException
         - java.io.IOException
+        - org.springframework.web.client.HttpServerErrorException
         - org.springframework.web.client.ResourceAccessException
+      ignoreExceptions:
+
 
 baseUrl: "http://localhost:1080/"
