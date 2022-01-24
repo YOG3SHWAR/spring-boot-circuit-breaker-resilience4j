@@ -1,6 +1,8 @@
 package com.sapient.circuitbreakerdemo.listner;
 
 import com.sapient.circuitbreakerdemo.config.KafkaManager;
+import com.sapient.circuitbreakerdemo.exceptions.CircuitOpenException;
+import com.sapient.circuitbreakerdemo.exceptions.RetryException;
 import com.sapient.circuitbreakerdemo.producer.Producer;
 import com.sapient.circuitbreakerdemo.service.Service;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
@@ -34,7 +36,7 @@ public class Listner {
     }
 
     @KafkaListener(topics = {"circuit_breaker_demo"})
-    public void readMessage(String message) {
+    public void readMessage(String message) throws RetryException, CircuitOpenException {
         this.message = message;
         log.info("message read from topic: {}", message);
         service.callRestApi(message);
