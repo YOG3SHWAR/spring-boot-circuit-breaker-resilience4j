@@ -1,6 +1,7 @@
 package com.sapient.circuitbreakerdemo.service;
 
-import com.sapient.circuitbreakerdemo.exceptions.CircuitOpenException;
+import com.sapient.circuitbreakerdemo.errorhandler.RestTemplateResponseErrorHandler;
+import com.sapient.circuitbreakerdemo.exceptions.OpenCircuitException;
 import com.sapient.circuitbreakerdemo.exceptions.RetryException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -21,40 +22,43 @@ public class Service {
     @Value(value = "${baseUrl}")
     private String baseUrl;
 
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     @Autowired
     public Service(RestTemplateBuilder restTemplateBuilder) {
         restTemplate = restTemplateBuilder
+                .errorHandler(new RestTemplateResponseErrorHandler())
                 .requestFactory(this::getClientHttpRequestFactory)
                 .build();
     }
 
-//    @CircuitBreaker(name = "fintech", fallbackMethod = "fallBack")
+    //    @CircuitBreaker(name = "fintech", fallbackMethod = "fallBack")
     @CircuitBreaker(name = "fintech")
     @Retry(name = "fintech")
-    public void callRestApi(String message) throws RetryException, CircuitOpenException {
+    public void callRestApi(String message) throws RetryException, OpenCircuitException {
         log.info("calling rest api...");
         callMockserver();
     }
 
-    private void callMockserver() throws RetryException, CircuitOpenException {
+    private void callMockserver()
+            throws RetryException, OpenCircuitException {
         log.info("calling mockserver...");
         String uri = baseUrl + "circuit-breaker";
-//        RestTemplate restTemplate = new RestTemplate(getClientHttpRequestFactory());
-//        String response = restTemplate.getForObject(uri, String.class);
+//        RestTemplate restTemplate = new RestTemplate(getClientHttpRequestFactory())
+//        String response = restTemplate.getForObject(uri, String.class)
         ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, null, String.class);
-        if (response.getStatusCode() != HttpStatus.OK) {
-            throwException(response.getStatusCode());
-        }
-        log.info("response = {}", response);
+//        if (response.getStatusCode() != HttpStatus.OK) {
+//            throwException(response.getStatusCode());
+//        }
+        log.info("response = {}", response.getBody());
     }
 
-    private void throwException(HttpStatus statusCode) throws RetryException, CircuitOpenException {
+    private void throwException(HttpStatus statusCode)
+            throws RetryException, OpenCircuitException {
         log.info("status code is: {}", statusCode);
         if (statusCode == HttpStatus.SERVICE_UNAVAILABLE)
             throw new RetryException("SERVICE_UNAVAILABLE: retrying");
-        else throw new CircuitOpenException("Error, circuit opening exception");
+        else throw new OpenCircuitException(statusCode + ", circuit opening exception");
     }
 
     private SimpleClientHttpRequestFactory getClientHttpRequestFactory() {

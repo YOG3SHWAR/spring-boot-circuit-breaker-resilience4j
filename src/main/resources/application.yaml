@@ -8,6 +8,7 @@ spring:
       topic: circuit_breaker_demo
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      max-poll-records: 5
 
 server:
   port: 8080
@@ -31,34 +32,48 @@ management.metrics.distribution.percentiles-histogram.resilience4j.circuitbreake
 
 #resilience4j.circuitbreaker.metrics.use_legacy_binder: true
 
+spring.kafka.common:
+  neverRetryExceptions:
+    - com.fasterxml.jackson.databind.exc.InvalidFormatException
+    - java.lang.UnsupportedOperationException
+    - java.lang.NullPointerException
+    - com.fasterxml.jackson.core.JsonParseException
+    - com.neobank.customer.common.exception.NeoBankException
+  maxAttempts: 3
+  defaultDlt: circuit_breaker_demo_dlt
+  dltEnabled: true
+  backOffPeriod: 10
+
 resilience4j.circuitbreaker:
   instances:
     fintech:
       registerHealthIndicator: true
       slidingWindowSize: 10
-      minimumNumberOfCalls: 1
+      minimumNumberOfCalls: 5
       permittedNumberOfCallsInHalfOpenState: 1
       automaticTransitionFromOpenToHalfOpenEnabled: true
-      waitDurationInOpenState: 30s
-      failureRateThreshold: 50
+      waitDurationInOpenState: 5s
+      failureRateThreshold: 80
       eventConsumerBufferSize: 10
       recordExceptions:
-        - java.util.concurrent.TimeoutException
-        - java.io.IOException
-        - org.springframework.web.client.HttpServerErrorException
-        - org.springframework.web.client.ResourceAccessException
+#        - java.util.concurrent.TimeoutException
+#        - java.io.IOException
+#        - org.springframework.web.client.HttpServerErrorException
+#        - org.springframework.web.client.ResourceAccessException
+        - com.sapient.circuitbreakerdemo.exceptions.OpenCircuitException
       ignoreExceptions:
 
 resilience4j.retry:
   instances:
     fintech:
-      maxAttempts: 1
-      waitDuration: 10s
+      maxAttempts: 3
+      waitDuration: 1s
       retryExceptions:
-        - java.util.concurrent.TimeoutException
-        - java.io.IOException
-        - org.springframework.web.client.HttpServerErrorException
-        - org.springframework.web.client.ResourceAccessException
+#        - java.util.concurrent.TimeoutException
+#        - java.io.IOException
+#        - org.springframework.web.client.HttpServerErrorException
+#        - org.springframework.web.client.ResourceAccessException
+        - com.sapient.circuitbreakerdemo.exceptions.RetryException
       ignoreExceptions:
 
 

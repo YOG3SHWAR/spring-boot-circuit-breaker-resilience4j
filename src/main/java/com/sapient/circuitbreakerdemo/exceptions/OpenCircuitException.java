@@ -2,8 +2,8 @@ package com.sapient.circuitbreakerdemo.exceptions;
 
 import java.io.IOException;
 
-public class RetryException extends IOException{
-    public RetryException(String msg) {
+public class OpenCircuitException extends IOException {
+    public OpenCircuitException(String msg) {
         super(msg);
     }
 }
